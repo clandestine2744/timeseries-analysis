@@ -701,10 +701,11 @@ timeseries.prototype.regression_forecast_optimize = function(options) {
 	}
 	
 	// Now we sort by MSE
-	MSEData = MSEData.sort(function(a,b) {
-		return a.MSE>b.MSE;
+	// MSEData = MSEData.sort(function(a,b) {
+	MSEData.sort(function(a,b) {		
+		return a.MSE.toFixed(10)-b.MSE.toFixed(10);
 	});
-	
+		
 	console.log("Best Settings: ",MSEData[0]);
 	
 	// Return the best settings
@@ -796,10 +797,11 @@ timeseries.prototype.sliding_regression_forecast = function(options) {
 		buffer[i+1][1]	= 0; //backup[i][1]*1;
 		for (j=0;j<coeffs.length;j++) {
 			if (options.method == 'ARMaxEntropy') {
-				buffer[i+1][1] -= backup[i-j][1]*coeffs[j];
+				buffer[i+1][1] -= backup[i-j][1]*coeffs[j];				
 			} else {
-				buffer[i+1][1] += backup[i-j][1]*coeffs[j];
-			}
+				buffer[i+1][1] += backup[i-j][1]*coeffs[j];	
+				
+			};
 		}
 		//buffer[i+1][1] -
 	}
@@ -1182,9 +1184,9 @@ timeseries.prototype.durbinWatson = function() {
 
 // Get the Durbin-Watson statistic
 // http://en.wikipedia.org/wiki/Durbin%E2%80%93Watson_statistic
-timeseries.prototype.regression_analysis = function() {
-	return this.regression_analysis().durbinWatson;
-}
+// timeseries.prototype.regression_analysis = function() {
+// 	return this.regression_analysis().durbinWatson;
+// }
 
 
 
