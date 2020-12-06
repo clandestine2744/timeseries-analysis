@@ -1,3 +1,5 @@
+//Author: "Julien Loutre", "email": "julien@twenty-six-medias.com", "url": "http://www.twenty-six-medias.com/". License "type": "MIT"
+
 var 			_ = require("underscore");
 var gimage 		= require('google-image-chart').charts;
 
@@ -814,6 +816,41 @@ timeseries.prototype.sliding_regression_forecast = function(options) {
 	return this;
 }
 
+//Predict x periods using a rolling sample size. Best to run the regression_forecast_optimize function to select the best method and degree.
+timeseries.prototype.predict = function(options) {
+
+	options = _.extend({
+		method:		'ARMaxEntropy',	// ARMaxEntropy | ARLeastSquare
+		predict: 	5, //Number of periods to predict
+		sample:		-10, //takes the last 10 records as the sample
+		degree:		3
+	},options);
+
+	var sample = 	this.data.slice(options.sample)
+	var coeffs 		= this[options.method]({degree:options.degree, data:sample});
+
+	for (var f=0;f<options.predict;f++) {
+		var forecast	= 0;
+		var arrLen = this.data.length -1
+		for (var i=0;i<coeffs.length;i++) {	// Loop through the coefficients
+			if (options.method == 'ARMaxEntropy') {
+				forecast -= Math.round(this.data[arrLen-i][1]*coeffs[i]);
+			} else {
+				forecast += Math.round(this.data[arrLen-i][1]*coeffs[i]);
+			}			
+			
+		}
+		this.data.push(['forecast'+f,forecast])
+		this.original.push(['forecast'+f,undefined])
+
+		var slidingSample = this.data.slice(-(options.sample+f))
+		var coeffs 		= this[options.method]({degree:options.degree, data:slidingSample}); 
+
+	}
+	
+	return this;	
+}
+
 
 
 // Autoregression method: MaxEntropy
@@ -1291,4 +1328,4 @@ adapter.tan = function(options) {
 
 exports.main		= timeseries;
 exports.adapter		= adapter;
-exports.version		= "1.0.11";
+exports.version		= "1.1.0";
